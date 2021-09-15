@@ -1,0 +1,140 @@
+---
+title: <center><h1>GLMs Assignment</h1></center>
+author: <center>River A. Watson</center>
+output: html_notebook
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+packages_needed <- c("ggplot2", # graphics
+                     "arm", # display() etc.
+                     "ggfortify", # check model assumptions
+                     "AICcmodavg", #average AIC models
+                     "grid" #arrange objects
+                     )
+pk_to_install <- packages_needed [!( packages_needed %in% rownames(installed.packages())  )]
+if(length(pk_to_install)>0 ){
+  install.packages(pk_to_install,repos="http://cran.r-project.org")
+}
+#lapply(packages_needed, require, character.only = TRUE)
+library(ggplot2)
+library(arm)
+library(ggfortify)
+library(AICcmodavg)
+library(grid)
+```
+
+##GLM-Poisson
+
+
+Conductivity levels as a predictor for Kentucky Arrow Darter abundance at a small spatial scale.
+Conductivity levels measured ranged from 40us/cm to 285us/cm.
+Catch per unit effort (CPUE) measured in fish caught per hour of shocking seconds.
+
+```{r data, echo = FALSE}
+cpue.data <- read.csv('Data/KAD_Cond_CPUE.csv')
+cpue.glm <- glm(Conductivity ~ CPUE, data = cpue.data, family = poisson)
+```
+
+```{r plot poisson}
+ggplot(cpue.data, aes(CPUE, Conductivity)) +
+  geom_point(size=3) +
+  stat_smooth(method = glm, method.args = list(family = poisson(link = "log"))) +
+  labs(title="GLM, poisson ") +
+  xlab ("CPUE (fish/hr)") +
+  ylab ("Conductivity us/cm")
+```
+Literally the opposite trend of what would be expected! (Future River plz explain to the people)
+```{r autoplot}
+autoplot(cpue.glm)
+```
+
+```{r anova}
+anova(cpue.glm)
+```
+
+```{r summary}
+summary(cpue.glm)
+```
+
+```{r qpoisson}
+cpue.qglm <- glm(Conductivity ~ CPUE, quasipoisson, data = cpue.data)
+summary(cpue.qglm)
+```
+
+```{r predicting}
+
+exp(4.324678+0.010803*1)
+
+#if our CPUE is 1 fish in one hour of shocking seconds what would the conductivity be?
+    
+```
+
+```{r pred}
+exp(4.324678+0.010803*30)
+```
+
+
+
+##GLM-Binomial Count
+
+
+Data from an in progress species description, dont try to steal it or anything
+
+Scale counts of East and West clades of *Etheostoma parvipinne*, focusing on total of upper and lower transverse scale counts.
+
+![Figure 2. East and West clades of *Etheostoma parvipinne* shown in blue and orange, respectfully.](Images\Parvipinne_Map.png)
+
+
+![Figure 3. Transverse scales on an *Etheostoma parvipinne* specimen, counted following Hubbs and Lagler, 1958](Images\Transverse.png)
+
+```{r scales}
+scale.data <- read.csv('data/Parvipinne_meristic_E_W_Trimmed.csv')
+scale.glm <- glm(Group~Transverse_Total, data = scale.data, family = binomial)
+```
+
+```{r scale plot raw fit}
+ggplot(scale.data,aes(Transverse_Total,Group)) +
+  geom_point() +
+  geom_smooth() +
+  xlab ("Total Transverse Scales") +
+  ylab ("Group") +
+  labs(title="Raw Fit: 1=West clade, 0=East clade")
+```
+0= East clade 1=West clade
+```{r scale plot 2}
+scalegroup.data <- read.csv('data/Parvipinne_meristic_E_W.csv')
+
+ggplot(scalegroup.data, aes(Group,Transverse_Total)) +
+  geom_boxplot() + 
+  geom_jitter(height = 0, width = .15)
+```
+```{r scale autoplot}
+autoplot(scale.glm)
+
+x <- predict(scale.glm)
+y <- resid(scale.glm)
+binnedplot(x, y)
+```
+
+
+```{r summ}
+coef(scale.glm)
+summary(scale.glm)
+```
+1.130268/4 = .282567, Transverse total scale count of 12.5 has a 28% chance of predicitng which clade the individual is in
+```{r scale plot 3}
+ggplot(scale.data, aes(Transverse_Total,Group)) +
+  geom_point() +
+  geom_smooth(method="glm", method.args=list(family="binomial"(link="logit"))) + 
+  xlab ("Transverse Scale Counts") +
+  ylab ("Clade")
+```
+0=East clade 1=West clade
+
+
+
+
+
+```
+

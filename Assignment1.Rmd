@@ -184,8 +184,9 @@ ggplot(scale.data, aes(Transverse_Total,Group)) +
 0=East clade 1=West clade
 
 
-
-
+<br>
+<br>
+<center><font size="12"><span style="color:DarkSlateBlue">The End</span></font></center>
 
 ```
 

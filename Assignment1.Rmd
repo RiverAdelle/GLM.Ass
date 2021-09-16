@@ -42,7 +42,7 @@ library(rmdformats)
 
 
 <br>
-
+<li>run poisson regression model</li>
 ```{r data, echo = FALSE}
 cpue.data <- read.csv('Data/KAD_Cond_CPUE.csv')
 cpue.glm <- glm(Conductivity ~ CPUE, data = cpue.data, family = poisson)
@@ -73,29 +73,35 @@ anova(cpue.glm)
 ```{r summary}
 summary(cpue.glm)
 ```
+Data is greatly overdispersed-much more variable that expected
 
 
+<li>Run a quasi poisson  regression to possibly get a better fit</li>
 ```{r qpoisson}
 cpue.qglm <- glm(Conductivity ~ CPUE, quasipoisson, data = cpue.data)
 summary(cpue.qglm)
 ```
-
-
+<br>
+<li>Exponentiate our logit scaled output to make a predicition</li>
+If our CPUE is 1 fish in one hour of shocking seconds what would the conductivity be?
 ```{r predicting}
 
 exp(4.324678+0.010803*1)
-
-#if our CPUE is 1 fish in one hour of shocking seconds what would the conductivity be?
-    
 ```
-
-
+<br>
+What if it was 30 fish/hr?
 ```{r pred}
+
 exp(4.324678+0.010803*30)
 ```
+<br>
+What about 150 fish/hr?
+```{r 10}
+exp(4.324678+0.010803*150)
+```
 
 
-
+<br>
 ## GLM-Binomial Count
 
 
@@ -127,7 +133,9 @@ ggplot(scale.data,aes(Transverse_Total,Group)) +
   ylab ("Group") +
   labs(title="Raw Fit: 1=West clade, 0=East clade")
 ```
-0= East clade 1=West clade
+ 0=East clade 1=West clade
+
+Transverse scale counts are higher in the West clade and the East clade
 
 
 ```{r scale plot 2}
@@ -139,6 +147,7 @@ ggplot(scalegroup.data, aes(Group,Transverse_Total)) +
 ```
 
 
+<li>autoplot which really means nothing here</li>
 ```{r scale autoplot}
 autoplot(scale.glm)
 
@@ -146,17 +155,25 @@ x <- predict(scale.glm)
 y <- resid(scale.glm)
 binnedplot(x, y)
 ```
+kinda looks like a sideways squid
 
-
+<br>
 ```{r summ}
-coef(scale.glm)
 summary(scale.glm)
 ```
-
+a bit underdispersed
 
 1.130268/4 = .282567, Transverse total scale count of 12.5 has a 28% chance of predicitng which clade the individual is in
 
+<li>trying quasi binomial for a better fit</li>
+```{r}
+scale.quasiglm <- glm(Group~Transverse_Total, data = scale.data, quasibinomial)
+summary(scale.quasiglm)
+```
+Standard error increase
 
+<br>
+<li>logit scale plot</li>
 ```{r scale plot 3}
 ggplot(scale.data, aes(Transverse_Total,Group)) +
   geom_point() +

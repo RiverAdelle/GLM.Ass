@@ -43,7 +43,7 @@ library(rmdformats)
 
 <br>
 <li>run poisson regression model</li>
-```{r data, echo = FALSE}
+```{r data}
 cpue.data <- read.csv('Data/KAD_Cond_CPUE.csv')
 cpue.glm <- glm(Conductivity ~ CPUE, data = cpue.data, family = poisson)
 ```
@@ -163,7 +163,7 @@ summary(scale.glm)
 ```
 a bit underdispersed
 
-1.130268/4 = .282567, Transverse total scale count of 12.5 has a 28% chance of predicitng which clade the individual is in
+1.130268/4 = .282567, Transverse total scale count has a 28% chance of predicting which clade the individual is in
 
 <li>trying quasi binomial for a better fit</li>
 ```{r}
